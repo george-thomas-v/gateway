@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import * as repositories from './repositories';
 import * as migrations from './migrations';
 import * as entities from './entities';
+import { S3UploadQueue } from 'src/queues';
 
 @Global()
 @Module({
@@ -30,7 +31,7 @@ import * as entities from './entities';
       },
     }),
   ],
-  providers: Object.values(repositories),
+  providers: [...Object.values(repositories),S3UploadQueue],
   exports: Object.values(repositories),
 })
 export class DataModule {}

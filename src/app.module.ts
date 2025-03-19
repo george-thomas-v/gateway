@@ -7,6 +7,10 @@ import { DocumentModule } from './features/document/document.module';
 import { IngestionModule } from './features/ingestion/ingestion.module';
 import { DataModule } from './data/data.module';
 import { ConfigModule } from '@nestjs/config';
+import { S3UploadService } from './services';
+import { S3UploadQueue } from './queues';
+import { S3UploadWorker } from './workers';
+import { GetEnvVariables } from './utils';
 
 @Module({
   imports: [
@@ -20,6 +24,12 @@ import { ConfigModule } from '@nestjs/config';
     DataModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    S3UploadService,
+    S3UploadQueue,
+    S3UploadWorker,
+    GetEnvVariables,
+  ],
 })
 export class AppModule {}

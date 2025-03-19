@@ -4,6 +4,7 @@ import {
   DataSource,
   EntityManager,
   EntityTarget,
+  InsertResult,
   Repository,
   UpdateResult,
 } from 'typeorm';
@@ -27,6 +28,14 @@ export class SessionRepository extends Repository<SessionEntity> {
     const { sessionId } = input;
     return this.softDelete({
       id: sessionId,
+    });
+  }
+
+  async createSession(input: { userId: string; token: string }):Promise<InsertResult> {
+    const { token, userId } = input;
+    return this.insert({
+      token,
+      user: { id: userId },
     });
   }
 }

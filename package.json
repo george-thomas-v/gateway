@@ -26,6 +26,8 @@
     "task:migration:show": "npm run typeorm-cli -- migration:show -d ./src/typeorm.config.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.758.0",
+    "@nestjs/bullmq": "^11.0.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.1",
     "@nestjs/core": "^11.0.1",
@@ -33,13 +35,15 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/microservices": "^11.0.11",
     "@nestjs/passport": "^11.0.5",
-    "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/platform-express": "^11.0.11",
     "@nestjs/swagger": "^11.0.6",
     "@nestjs/typeorm": "^11.0.0",
     "argon2": "^0.41.1",
+    "bullmq": "^5.44.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "jsonwebtoken": "^9.0.2",
+    "multer": "1.4.5-lts.1",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "pg": "^8.14.1",
@@ -57,6 +61,7 @@
     "@swc/core": "^1.10.7",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
+    "@types/multer": "^1.4.12",
     "@types/node": "^22.10.7",
     "@types/supertest": "^6.0.2",
     "dotenv": "^16.4.7",
@@ -92,7 +97,15 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@app/libs(.*)$": "<rootDir>/libs$1",
+      "^@app/entities(.*)$": "<rootDir>/data/entities$1",
+      "^@app/enums(.*)$": "<rootDir>/data/enums$1",
+      "^@app/types(.*)$": "<rootDir>/types$1",
+      "^@app/utils(.*)$": "<rootDir>/utils$1",
+      "^src/(.*)$": "<rootDir>/$1"
+    }
   },
   "pnpm": {
     "ignoredBuiltDependencies": [

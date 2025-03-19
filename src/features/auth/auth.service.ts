@@ -26,7 +26,7 @@ export class AuthService {
     private readonly sessionRepository: SessionRepository,
     private readonly argon2Utils: Argon2Utils,
     private readonly jwtService: JwtService,
-    private readonly getEnvVariables:GetEnvVariables
+    private readonly getEnvVariables: GetEnvVariables,
   ) {}
   async login(input: LoginCredentialsDto) {
     const { email, password } = input;
@@ -44,17 +44,26 @@ export class AuthService {
     return user;
   }
 
-  createTokens(user: UserEntity): LoginResponseDto {
+  async createTokens(user: UserEntity): Promise<LoginResponseDto> {
     const { id, role } = user;
+    const accessToken = this.jwtService.sign(
+      <JwtUser>{
+        role,
+        sub: id,
+        type: ETokenType.ACCESS_TOKEN,
+      },
+      {
+        secret: this.getEnvVariables.jwtSecret,
+      },
+    );
+
+    await this.sessionRepository.createSession({
+      userId: user.id,
+      token: accessToken,
+    });
     return {
       data: {
-        accessToken: this.jwtService.sign(<JwtUser>{
-          role,
-          sub: id,
-          type: ETokenType.ACCESS_TOKEN,
-        },{
-          secret:this.getEnvVariables.jwtSecret
-        }),
+        accessToken,
         user: { ...user, password: [] },
       },
       success: true,
