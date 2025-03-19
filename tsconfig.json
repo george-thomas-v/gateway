@@ -1,0 +1,42 @@
+{
+  "include": [
+    "src/**/*"
+  ],
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false,
+    "forceConsistentCasingInFileNames": false,
+    "noUncheckedIndexedAccess": true,
+    "strictNullChecks": true,
+    "target": "esnext",
+    "paths": {
+      "@app/libs": [
+        "src/libs"
+      ],
+      "@app/entities": [
+        "src/data/entities"
+      ],
+      "@app/enums": [
+        "src/data/enums"
+      ],
+      "@app/types": [
+        "src/types"
+      ],
+      "@app/utils": [
+        "src/utils"
+      ],
+    }
+  }
+}
