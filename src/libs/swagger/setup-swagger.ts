@@ -4,7 +4,7 @@ import { tags } from './tags.constant';
 
 export const setup = (app: INestApplication): void => {
   const builder = new DocumentBuilder()
-    .setTitle('JK Machine Task')
+    .setTitle('JK POC GATEWAY')
     .setVersion(process.env.npm_package_version as string)
     .addBearerAuth();
 

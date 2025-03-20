@@ -30,9 +30,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AssetDto, ResponseDto } from 'src/libs/dto';
+import { DocumentDto, ResponseDto } from 'src/libs/dto';
 import { EUserRoles } from '@app/enums';
-import { GetAllAssetsQueryDto } from './dto';
+import { GetAllDocumentsQueryDto } from './dto';
 
 @Controller('documents')
 @UseGuards(JwtAuthGuard)
@@ -83,8 +83,8 @@ export class DocumentController {
     });
   }
 
-  @Put('/:assetId/update')
-  @ApiOperation({ summary: 'Update asset file by assetId' })
+  @Put('/:documentId/update')
+  @ApiOperation({ summary: 'Update document file by documentId' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -112,19 +112,19 @@ export class DocumentController {
       limits: { fileSize: 100 * 1024 * 1024 },
     }),
   )
-  async updateAssetFile(
-    @Param('assetId', new ParseUUIDPipe()) assetId: string,
+  async updateDocumentFile(
+    @Param('documentId', new ParseUUIDPipe()) documentId: string,
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: UserEntity,
   ): Promise<ResponseDto> {
-    return this.documentService.updateAssetFile({
-      assetId,
+    return this.documentService.updateDocumentFile({
+      documentId,
       file,
       userId: user.id,
     });
   }
 
-  @Delete('/:assetId')
+  @Delete('/:documentId')
   @ApiNotFoundResponse({
     description: 'No file found to delete',
   })
@@ -132,11 +132,11 @@ export class DocumentController {
     status: 200,
     type: ResponseDto,
   })
-  async deleteAsset(
+  async deleteDocument(
     @CurrentUser() user: UserEntity,
-    @Param('assetId', new ParseUUIDPipe()) assetId: string,
+    @Param('documentId', new ParseUUIDPipe()) documentId: string,
   ): Promise<ResponseDto> {
-    return this.documentService.deleteAsset({ assetId, userId: user.id });
+    return this.documentService.deleteDocument({ documentId, userId: user.id });
   }
 
   @Get('/get-all')
@@ -144,38 +144,37 @@ export class DocumentController {
   @Roles(EUserRoles.ADMIN)
   @ApiResponse({
     status: 200,
-    type: AssetDto,
+    type: DocumentDto,
   })
-  async getAllAssets(
-    @Query() input: GetAllAssetsQueryDto,
-  ): Promise<AssetDto[]> {
-    return this.documentService.getAllAssets({ ...input });
+  async getAllDocuments(
+    @Query() input: GetAllDocumentsQueryDto,
+  ): Promise<DocumentDto[]> {
+    return this.documentService.getAllDocuments({ ...input });
   }
 
-  @Get('/user-assets')
+  @Get('/user-documents')
   @ApiResponse({
     status: 200,
-    type: AssetDto,
+    type: DocumentDto,
   })
-  async getUserAssets(
-    @Query() input: GetAllAssetsQueryDto,
+  async getUserDocuments(
+    @Query() input: GetAllDocumentsQueryDto,
     @CurrentUser() user: UserEntity,
-  ): Promise<AssetDto[]> {
-    console.log(input)
-    return this.documentService.getAllAssets({ ...input, userId: user.id });
+  ): Promise<DocumentDto[]> {
+    return this.documentService.getAllDocuments({ ...input, userId: user.id });
   }
 
-  @Get('/:assetId')
+  @Get('/:documentId')
   @ApiNotFoundResponse({
-    description: 'No asset found',
+    description: 'No document found',
   })
   @ApiResponse({
     status: 200,
-    type: AssetDto,
+    type: DocumentDto,
   })
-  async getAsset(
-    @Param('assetId', new ParseUUIDPipe()) assetId: string,
-  ): Promise<AssetDto> {
-    return this.documentService.getAsset({ assetId });
+  async getDocument(
+    @Param('documentId', new ParseUUIDPipe()) documentId: string,
+  ): Promise<DocumentDto> {
+    return this.documentService.getDocument({ documentId });
   }
 }

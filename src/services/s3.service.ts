@@ -24,7 +24,6 @@ export class S3UploadService {
 
   async uploadFile(input: { file: Express.Multer.File; key: string }) {
     const { key, file } = input;
-    console.log(file.buffer)
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: key,

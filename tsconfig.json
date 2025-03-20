@@ -1,7 +1,7 @@
 {
   "include": [
     "src/**/*"
-  ],
+, "../ingestion/src/libs/swagger"  ],
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,

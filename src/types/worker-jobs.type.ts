@@ -1,5 +1,5 @@
 export interface S3UploadJobData {
   file: Express.Multer.File;
-  assetId: string;
+  documentId: string;
   key:string;
 }

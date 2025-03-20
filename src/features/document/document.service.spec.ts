@@ -1,35 +1,35 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DocumentService } from './document.service';
-import { AssetRepository } from 'src/data/repositories';
+import { DocumentRepository } from 'src/data/repositories';
 import { NotFoundException } from '@nestjs/common';
-import { EAssetStatus } from '@app/enums';
+import { EDocumentStatus } from '@app/enums';
 
 describe('DocumentService', () => {
   let service: DocumentService;
-  let assetRepository: jest.Mocked<AssetRepository>;
+  let documentRepository: jest.Mocked<DocumentRepository>;
 
   beforeEach(async () => {
-    const mockAssetRepository = {
-      createAssetAndAddToQueue: jest.fn(),
-      updateAssetAndAddToQueue: jest.fn(),
-      getAsset: jest.fn(),
-      deleteExistingAsset: jest.fn(),
-      getAllAssets: jest.fn(),
-      getOneAsset: jest.fn(),
+    const mockDocumentRepository = {
+      createDocumentAndAddToQueue: jest.fn(),
+      updateDocumentAndAddToQueue: jest.fn(),
+      getDocument: jest.fn(),
+      deleteExistingDocument: jest.fn(),
+      getAllDocuments: jest.fn(),
+      getOneDocument: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DocumentService,
         {
-          provide: AssetRepository,
-          useValue: mockAssetRepository,
+          provide: DocumentRepository,
+          useValue: mockDocumentRepository,
         },
       ],
     }).compile();
 
     service = module.get<DocumentService>(DocumentService);
-    assetRepository = module.get(AssetRepository);
+    documentRepository = module.get(DocumentRepository);
   });
 
   it('should be defined', () => {
@@ -38,7 +38,7 @@ describe('DocumentService', () => {
 
   describe('uploadFiles', () => {
     it('should upload files and return response', async () => {
-      assetRepository.createAssetAndAddToQueue.mockResolvedValue(true);
+      documentRepository.createDocumentAndAddToQueue.mockResolvedValue(true);
 
       const result = await service.uploadFiles({
         files: [{ originalname: 'file1.txt' }] as Express.Multer.File[],
@@ -47,35 +47,35 @@ describe('DocumentService', () => {
 
       expect(result).toEqual({
         success: true,
-        message: 'Files uplaod processing',
+        message: 'Files upload processing',
       });
 
-      expect(assetRepository.createAssetAndAddToQueue).toHaveBeenCalledWith({
+      expect(documentRepository.createDocumentAndAddToQueue).toHaveBeenCalledWith({
         files: [{ originalname: 'file1.txt' }],
         userId: 'user-123',
       });
     });
   });
 
-  describe('updateAssetFile', () => {
-    it('should update asset file and return response', async () => {
-      assetRepository.getAsset.mockResolvedValue({ id: 'asset-123' } as any);
-      assetRepository.updateAssetAndAddToQueue.mockResolvedValue(true);
+  describe('updateDocumentFile', () => {
+    it('should update document file and return response', async () => {
+      documentRepository.getDocument.mockResolvedValue({ id: 'document-123' } as any);
+      documentRepository.updateDocumentAndAddToQueue.mockResolvedValue(true);
 
-      const result = await service.updateAssetFile({
+      const result = await service.updateDocumentFile({
         file: { originalname: 'newfile.txt' } as Express.Multer.File,
-        assetId: 'asset-123',
+        documentId: 'document-123',
         userId: 'user-123',
       });
 
-      expect(assetRepository.getAsset).toHaveBeenCalledWith({
-        assetId: 'asset-123',
+      expect(documentRepository.getDocument).toHaveBeenCalledWith({
+        documentId: 'document-123',
         userId: 'user-123',
       });
 
-      expect(assetRepository.updateAssetAndAddToQueue).toHaveBeenCalledWith({
+      expect(documentRepository.updateDocumentAndAddToQueue).toHaveBeenCalledWith({
         file: { originalname: 'newfile.txt' },
-        assetId: 'asset-123',
+        documentId: 'document-123',
       });
 
       expect(result).toEqual({
@@ -85,22 +85,21 @@ describe('DocumentService', () => {
     });
   });
 
-  describe('deleteAsset', () => {
-    it('should delete asset and return success response', async () => {
-      assetRepository.deleteExistingAsset.mockResolvedValue({
+  describe('deleteDocument', () => {
+    it('should delete document and return success response', async () => {
+      documentRepository.deleteExistingDocument.mockResolvedValue({
         affected: 1,
         raw: [],
         generatedMaps: [],
       });
-      
 
-      const result = await service.deleteAsset({
-        assetId: 'asset-123',
+      const result = await service.deleteDocument({
+        documentId: 'document-123',
         userId: 'user-123',
       });
 
-      expect(assetRepository.deleteExistingAsset).toHaveBeenCalledWith({
-        assetId: 'asset-123',
+      expect(documentRepository.deleteExistingDocument).toHaveBeenCalledWith({
+        documentId: 'document-123',
         userId: 'user-123',
       });
 
@@ -111,56 +110,55 @@ describe('DocumentService', () => {
     });
 
     it('should throw NotFoundException if no file deleted', async () => {
-      assetRepository.deleteExistingAsset.mockResolvedValue({
+      documentRepository.deleteExistingDocument.mockResolvedValue({
         affected: 0,
         raw: [],
         generatedMaps: [],
       });
-      
 
       await expect(
-        service.deleteAsset({
-          assetId: 'asset-404',
+        service.deleteDocument({
+          documentId: 'document-404',
           userId: 'user-123',
         }),
       ).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('getAllAssets', () => {
-    it('should return all assets', async () => {
-      const mockAssets = [{ id: 'asset-1' }, { id: 'asset-2' }];
-      assetRepository.getAllAssets.mockResolvedValue(mockAssets as any);
+  describe('getAllDocuments', () => {
+    it('should return all documents', async () => {
+      const mockDocuments = [{ id: 'document-1' }, { id: 'document-2' }];
+      documentRepository.getAllDocuments.mockResolvedValue(mockDocuments as any);
 
-      const result = await service.getAllAssets({
+      const result = await service.getAllDocuments({
         userId: 'user-123',
-        assetStatus: EAssetStatus.PROCESSING,
+        documentStatus: EDocumentStatus.PROCESSING,
         skip: 0,
         limit: 10,
       });
 
-      expect(assetRepository.getAllAssets).toHaveBeenCalledWith({
+      expect(documentRepository.getAllDocuments).toHaveBeenCalledWith({
         userId: 'user-123',
         page: 1,
         limit: 10,
       });
 
-      expect(result).toEqual(mockAssets);
+      expect(result).toEqual(mockDocuments);
     });
   });
 
-  describe('getAsset', () => {
-    it('should return one asset', async () => {
-      const mockAsset = { id: 'asset-1' };
-      assetRepository.getOneAsset.mockResolvedValue(mockAsset as any);
+  describe('getDocument', () => {
+    it('should return one document', async () => {
+      const mockDocument = { id: 'document-1' };
+      documentRepository.getOneDocument.mockResolvedValue(mockDocument as any);
 
-      const result = await service.getAsset({ assetId: 'asset-1' });
+      const result = await service.getDocument({ documentId: 'document-1' });
 
-      expect(assetRepository.getOneAsset).toHaveBeenCalledWith({
-        assetId: 'asset-1',
+      expect(documentRepository.getOneDocument).toHaveBeenCalledWith({
+        documentId: 'document-1',
       });
 
-      expect(result).toEqual(mockAsset);
+      expect(result).toEqual(mockDocument);
     });
   });
 });

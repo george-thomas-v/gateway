@@ -17,7 +17,7 @@ export class S3UploadQueue {
   }
 
   async addToQueue(input: S3UploadJobData) {
-    const { file, assetId,key } = input;
-    this.queue.add('s3-upload', <S3UploadJobData>{ assetId, file,key });
+    const { file, documentId,key } = input;
+    this.queue.add('s3-upload', <S3UploadJobData>{ documentId, file,key });
   }
 }

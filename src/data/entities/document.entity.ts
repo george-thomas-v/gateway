@@ -1,4 +1,4 @@
-import { EAssetStatus } from '@app/enums';
+import { EDocumentStatus } from '@app/enums';
 import {
   Column,
   CreateDateColumn,
@@ -10,8 +10,8 @@ import {
 } from 'typeorm';
 import { UserEntity } from './user.entity';
 
-@Entity('assets')
-export class AssetEntity {
+@Entity('documents')
+export class DocumentEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -23,10 +23,10 @@ export class AssetEntity {
 
   @Column({
     type: 'enum',
-    enum: EAssetStatus,
-    default: EAssetStatus.PROCESSING,
+    enum: EDocumentStatus,
+    default: EDocumentStatus.PROCESSING,
   })
-  assetStatus: EAssetStatus;
+  documentStatus: EDocumentStatus;
 
   @Column({ type: 'varchar', nullable: true })
   objectURL: string | null;
