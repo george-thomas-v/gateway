@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { AssetRepository } from 'src/data/repositories';
-import { AssetDto, ResponseDto } from 'src/libs/dto';
-import { GetAllAssetsQueryDto } from './dto';
+import { DocumentRepository } from 'src/data/repositories';
+import { DocumentDto, ResponseDto } from 'src/libs/dto';
+import { GetAllDocumentsQueryDto } from './dto';
 
 @Injectable()
 export class DocumentService {
-  constructor(private readonly assetRepository: AssetRepository) {}
+  constructor(private readonly documentRepository: DocumentRepository) {}
 
   async uploadFiles(input: {
     files: Express.Multer.File[];
@@ -13,37 +13,37 @@ export class DocumentService {
   }): Promise<ResponseDto> {
     const { userId, files } = input;
     return {
-      success: await this.assetRepository.createAssetAndAddToQueue({
+      success: await this.documentRepository.createDocumentAndAddToQueue({
         userId,
         files,
       }),
-      message: 'Files uplaod processing',
+      message: 'Files upload processing',
     };
   }
 
-  async updateAssetFile(input: {
+  async updateDocumentFile(input: {
     file: Express.Multer.File;
     userId: string;
-    assetId: string;
+    documentId: string;
   }): Promise<ResponseDto> {
-    const { file, assetId, userId } = input;
-    await this.assetRepository.getAsset({ assetId, userId });
+    const { file, documentId, userId } = input;
+    await this.documentRepository.getDocument({ documentId, userId });
     return {
-      success: await this.assetRepository.updateAssetAndAddToQueue({
+      success: await this.documentRepository.updateDocumentAndAddToQueue({
         file,
-        assetId,
+        documentId,
       }),
       message: 'File upload in progress',
     };
   }
 
-  async deleteAsset(input: {
-    assetId: string;
+  async deleteDocument(input: {
+    documentId: string;
     userId: string;
   }): Promise<ResponseDto> {
-    const { assetId, userId } = input;
-    const result = await this.assetRepository.deleteExistingAsset({
-      assetId,
+    const { documentId, userId } = input;
+    const result = await this.documentRepository.deleteExistingDocument({
+      documentId,
       userId,
     });
     const { affected } = result;
@@ -54,12 +54,12 @@ export class DocumentService {
     };
   }
 
-  async getAllAssets(input: GetAllAssetsQueryDto): Promise<AssetDto[]> {
-    return this.assetRepository.getAllAssets({ ...input });
+  async getAllDocuments(input: GetAllDocumentsQueryDto): Promise<DocumentDto[]> {
+    return this.documentRepository.getAllDocuments({ ...input });
   }
 
-  async getAsset(input:{assetId:string}):Promise<AssetDto> {
-    const {assetId} = input;
-    return this.assetRepository.getOneAsset({assetId})
+  async getDocument(input: { documentId: string }): Promise<DocumentDto> {
+    const { documentId } = input;
+    return this.documentRepository.getOneDocument({ documentId });
   }
 }

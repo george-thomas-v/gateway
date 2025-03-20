@@ -10,7 +10,7 @@ import {
 import { EUserRoles } from '../enums';
 import { PasswordEntity } from './password.entity';
 import { SessionEntity } from './session.entity';
-import { AssetEntity } from './asset.entity';
+import { DocumentEntity } from './document.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -45,10 +45,10 @@ export class UserEntity {
   })
   session: SessionEntity[];
 
-  @OneToMany(() => AssetEntity, ({ user }) => user, {
+  @OneToMany(() => DocumentEntity, ({ user }) => user, {
     onDelete: 'CASCADE',
   })
-  asset: AssetEntity[];
+  asset: DocumentEntity[];
 
   @CreateDateColumn()
   createdAt: Date;

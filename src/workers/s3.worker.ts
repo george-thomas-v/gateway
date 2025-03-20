@@ -3,8 +3,8 @@ import { Worker, Job } from 'bullmq';
 import { S3UploadService } from 'src/services/s3.service';
 import { S3UploadJobData } from '@app/types';
 import { GetEnvVariables } from '@app/utils';
-import { AssetRepository } from 'src/data/repositories';
-import { EAssetStatus } from '@app/enums';
+import { DocumentRepository } from 'src/data/repositories';
+import { EDocumentStatus } from '@app/enums';
 
 @Injectable()
 export class S3UploadWorker implements OnModuleInit, OnModuleDestroy {
@@ -13,27 +13,26 @@ export class S3UploadWorker implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly s3UploadService: S3UploadService,
     private readonly getEnvVariables: GetEnvVariables,
-    private readonly assetRepository: AssetRepository,
+    private readonly documentRepository: DocumentRepository,
   ) {}
 
   onModuleInit() {
     this.worker = new Worker(
       's3-upload',
       async (job: Job<S3UploadJobData>) => {
-        const { file, assetId, key } = job.data;
+        const { file, documentId, key } = job.data;
         try {
           const response = await this.s3UploadService.uploadFile({ file, key });
           if (response.url)
-            await this.assetRepository.updateAssetStatus({
-              assetId,
-              assetStatus: EAssetStatus.COMPLETED,
+            await this.documentRepository.updateDocumentStatus({
+              documentId,
+              documentStatus: EDocumentStatus.COMPLETED,
               objectURL: response.url,
             });
         } catch (e) {
-          console.log(e)
-          await this.assetRepository.updateAssetStatus({
-            assetId,
-            assetStatus: EAssetStatus.FAILED,
+          await this.documentRepository.updateDocumentStatus({
+            documentId,
+            documentStatus: EDocumentStatus.FAILED,
             objectURL: null,
           });
         }

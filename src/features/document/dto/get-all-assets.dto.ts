@@ -1,4 +1,4 @@
-import { EAssetStatus } from '@app/enums';
+import { EDocumentStatus } from '@app/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
@@ -9,7 +9,8 @@ import {
   Min,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-export class GetAllAssetsQueryDto {
+
+export class GetAllDocumentsQueryDto {
   @ApiProperty({
     example: '',
     required: false,
@@ -19,12 +20,12 @@ export class GetAllAssetsQueryDto {
   userId?: string;
 
   @ApiProperty({
-    example: EAssetStatus.COMPLETED,
+    example: EDocumentStatus.COMPLETED,
     required: false,
   })
-  @IsEnum(EAssetStatus)
+  @IsEnum(EDocumentStatus)
   @IsOptional()
-  assetStatus: EAssetStatus;
+  documentStatus: EDocumentStatus;
 
   @ApiProperty({
     description: 'Skip',

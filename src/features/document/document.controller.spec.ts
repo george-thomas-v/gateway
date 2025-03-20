@@ -3,18 +3,18 @@ import { DocumentController } from './document.controller';
 import { DocumentService } from './document.service';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
 import { EUserRoles } from '@app/enums';
-import { GetAllAssetsQueryDto } from './dto';
-import { AssetDto, ResponseDto } from 'src/libs/dto';
+import { GetAllDocumentsQueryDto } from './dto';
+import { DocumentDto, ResponseDto } from 'src/libs/dto';
 import { ExecutionContext } from '@nestjs/common';
 import { UserEntity } from '@app/entities';
 import { Readable } from 'stream';
 
 const mockDocumentService = {
   uploadFiles: jest.fn(),
-  updateAssetFile: jest.fn(),
-  deleteAsset: jest.fn(),
-  getAllAssets: jest.fn(),
-  getAsset: jest.fn(),
+  updateDocumentFile: jest.fn(),
+  deleteDocument: jest.fn(),
+  getAllDocuments: jest.fn(),
+  getDocument: jest.fn(),
 };
 
 const mockUser = { id: 'user-id', role: EUserRoles.EDITOR } as UserEntity;
@@ -76,8 +76,8 @@ describe('DocumentController', () => {
     });
   });
 
-  describe('updateAssetFile', () => {
-    it('should update file for an asset', async () => {
+  describe('updateDocumentFile', () => {
+    it('should update file for a document', async () => {
       const buffer = Buffer.from('update content');
       const file = {
         fieldname: 'file',
@@ -93,52 +93,52 @@ describe('DocumentController', () => {
       } as Express.Multer.File;
 
       const mockResponse: ResponseDto = { success: true, message: 'Updated' };
-      mockDocumentService.updateAssetFile.mockResolvedValue(mockResponse);
+      mockDocumentService.updateDocumentFile.mockResolvedValue(mockResponse);
 
-      const result = await controller.updateAssetFile('asset-id', file, mockUser);
+      const result = await controller.updateDocumentFile('document-id', file, mockUser);
       expect(result).toEqual(mockResponse);
     });
   });
 
-  describe('deleteAsset', () => {
-    it('should delete asset and return response', async () => {
+  describe('deleteDocument', () => {
+    it('should delete document and return response', async () => {
       const mockResponse: ResponseDto = { success: true, message: 'Deleted' };
-      mockDocumentService.deleteAsset.mockResolvedValue(mockResponse);
+      mockDocumentService.deleteDocument.mockResolvedValue(mockResponse);
 
-      const result = await controller.deleteAsset(mockUser, 'asset-id');
+      const result = await controller.deleteDocument(mockUser, 'document-id');
       expect(result).toEqual(mockResponse);
     });
   });
 
-  describe('getAllAssets', () => {
-    it('should return list of all assets', async () => {
+  describe('getAllDocuments', () => {
+    it('should return list of all documents', async () => {
       const input = { page: 1, limit: 10 } as any; // Use `any` if DTO is strict
-      const mockAssets: AssetDto[] = [{ id: 'asset-1', key: 'key-1' } as AssetDto];
-      mockDocumentService.getAllAssets.mockResolvedValue(mockAssets);
+      const mockDocuments: DocumentDto[] = [{ id: 'document-1', key: 'key-1' } as DocumentDto];
+      mockDocumentService.getAllDocuments.mockResolvedValue(mockDocuments);
 
-      const result = await controller.getAllAssets(input);
-      expect(result).toEqual(mockAssets);
+      const result = await controller.getAllDocuments(input);
+      expect(result).toEqual(mockDocuments);
     });
   });
 
-  describe('getUserAssets', () => {
-    it('should return list of user assets', async () => {
+  describe('getUserDocuments', () => {
+    it('should return list of user documents', async () => {
       const input = { page: 1, limit: 10 } as any; // Use `any` if DTO is strict
-      const mockAssets: AssetDto[] = [{ id: 'asset-2', key: 'key-2' } as AssetDto];
-      mockDocumentService.getAllAssets.mockResolvedValue(mockAssets);
+      const mockDocuments: DocumentDto[] = [{ id: 'document-2', key: 'key-2' } as DocumentDto];
+      mockDocumentService.getAllDocuments.mockResolvedValue(mockDocuments);
 
-      const result = await controller.getUserAssets(input, mockUser);
-      expect(result).toEqual(mockAssets);
+      const result = await controller.getUserDocuments(input, mockUser);
+      expect(result).toEqual(mockDocuments);
     });
   });
 
-  describe('getAsset', () => {
-    it('should return a single asset by id', async () => {
-      const mockAsset: AssetDto = { id: 'asset-id', key: 'key-xyz' } as AssetDto;
-      mockDocumentService.getAsset.mockResolvedValue(mockAsset);
+  describe('getDocument', () => {
+    it('should return a single document by id', async () => {
+      const mockDocument: DocumentDto = { id: 'document-id', key: 'key-xyz' } as DocumentDto;
+      mockDocumentService.getDocument.mockResolvedValue(mockDocument);
 
-      const result = await controller.getAsset('asset-id');
-      expect(result).toEqual(mockAsset);
+      const result = await controller.getDocument('document-id');
+      expect(result).toEqual(mockDocument);
     });
   });
 });
