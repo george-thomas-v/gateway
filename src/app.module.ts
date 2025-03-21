@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { AuthModule } from './features/auth/auth.module';
 import { UserModule } from './features/user/user.module';
 import { DocumentModule } from './features/document/document.module';
-import { IngestionModule } from './features/ingestion/ingestion.module';
 import { DataModule } from './data/data.module';
 import { ConfigModule } from '@nestjs/config';
 import { S3UploadService } from './services';
@@ -20,7 +19,6 @@ import { GetEnvVariables } from './utils';
     AuthModule,
     UserModule,
     DocumentModule,
-    IngestionModule,
     DataModule,
   ],
   controllers: [AppController],
