@@ -14,6 +14,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
   private consumer = this.kafka.consumer({ groupId: 'gateway-service' });
 
   async onModuleInit() {
+    this.consumer.subscribe({ topics: ['processing-failed'] });
     await this.producer.connect();
     await this.consumer.connect();
 
