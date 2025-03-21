@@ -2,10 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DocumentRepository } from 'src/data/repositories';
 import { DocumentDto, ResponseDto } from 'src/libs/dto';
 import { GetAllDocumentsQueryDto } from './dto';
+import { S3UploadQueue } from 'src/queues';
 
 @Injectable()
 export class DocumentService {
-  constructor(private readonly documentRepository: DocumentRepository) {}
+  constructor(
+    private readonly documentRepository: DocumentRepository,
+  ) {}
 
   async uploadFiles(input: {
     files: Express.Multer.File[];
@@ -13,7 +16,7 @@ export class DocumentService {
   }): Promise<ResponseDto> {
     const { userId, files } = input;
     return {
-      success: await this.documentRepository.createDocumentAndAddToQueue({
+      success: await this.documentRepository.createDocument({
         userId,
         files,
       }),
@@ -54,7 +57,9 @@ export class DocumentService {
     };
   }
 
-  async getAllDocuments(input: GetAllDocumentsQueryDto): Promise<DocumentDto[]> {
+  async getAllDocuments(
+    input: GetAllDocumentsQueryDto,
+  ): Promise<DocumentDto[]> {
     return this.documentRepository.getAllDocuments({ ...input });
   }
 
