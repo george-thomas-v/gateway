@@ -22,29 +22,36 @@ export class DocumentRepository extends Repository<DocumentEntity> {
     super(DocumentEntity, entityManager);
   }
 
-  async createDocumentAndAddToQueue(input: {
+  async createDocument(input: {
     userId: string;
     files: Express.Multer.File[];
-  }): Promise<boolean> {
+  }): Promise<DocumentEntity[]> {
     const { userId, files } = input;
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      files.forEach(async (file) => {
-        const key = `uploads/${uuidv4()}-${file.originalname}`;
-        const document = queryRunner.manager
-          .getRepository(DocumentEntity)
-          .create({
+      const documents = await Promise.all(
+        files.map(async (file) => {
+          const key = `uploads/${uuidv4()}-${file.originalname}`;
+          const document = queryRunner.manager
+            .getRepository(DocumentEntity)
+            .create({
+              key,
+              mimeType: file.mimetype,
+              user: { id: userId },
+            });
+          await queryRunner.manager.save(document);
+          await this.s3Queue.addToQueue({
+            documentId: document.id,
+            file,
             key,
-            mimeType: file.mimetype,
-            user: { id: userId },
           });
-        await queryRunner.manager.save(document);
-        await this.s3Queue.addToQueue({ key, documentId: document.id, file });
-      });
+          return document;
+        }),
+      );
       await queryRunner.commitTransaction();
-      return true;
+      return documents;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;

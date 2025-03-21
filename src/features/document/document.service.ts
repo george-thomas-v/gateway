@@ -2,21 +2,34 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DocumentRepository } from 'src/data/repositories';
 import { DocumentDto, ResponseDto } from 'src/libs/dto';
 import { GetAllDocumentsQueryDto } from './dto';
+import { S3UploadQueue } from 'src/queues';
+import { KafkaService } from 'src/services';
 
 @Injectable()
 export class DocumentService {
-  constructor(private readonly documentRepository: DocumentRepository) {}
+  constructor(
+    private readonly documentRepository: DocumentRepository,
+    private readonly kafkaService: KafkaService,
+  ) {}
 
   async uploadFiles(input: {
     files: Express.Multer.File[];
     userId: string;
   }): Promise<ResponseDto> {
     const { userId, files } = input;
+    const documents = await this.documentRepository.createDocument({
+      userId,
+      files,
+    });
+    documents.forEach(
+      async (doc) =>
+        await this.kafkaService.startProcessing({
+          topic: 'start-processing',
+          message: doc,
+        }),
+    );
     return {
-      success: await this.documentRepository.createDocumentAndAddToQueue({
-        userId,
-        files,
-      }),
+      success: true,
       message: 'Files upload processing',
     };
   }
@@ -54,7 +67,9 @@ export class DocumentService {
     };
   }
 
-  async getAllDocuments(input: GetAllDocumentsQueryDto): Promise<DocumentDto[]> {
+  async getAllDocuments(
+    input: GetAllDocumentsQueryDto,
+  ): Promise<DocumentDto[]> {
     return this.documentRepository.getAllDocuments({ ...input });
   }
 
