@@ -3,11 +3,13 @@ import { DocumentRepository } from 'src/data/repositories';
 import { DocumentDto, ResponseDto } from 'src/libs/dto';
 import { GetAllDocumentsQueryDto } from './dto';
 import { S3UploadQueue } from 'src/queues';
+import { KafkaService } from 'src/services';
 
 @Injectable()
 export class DocumentService {
   constructor(
     private readonly documentRepository: DocumentRepository,
+    private readonly kafkaService: KafkaService,
   ) {}
 
   async uploadFiles(input: {
@@ -15,11 +17,19 @@ export class DocumentService {
     userId: string;
   }): Promise<ResponseDto> {
     const { userId, files } = input;
+    const documents = await this.documentRepository.createDocument({
+      userId,
+      files,
+    });
+    documents.forEach(
+      async (doc) =>
+        await this.kafkaService.startProcessing({
+          topic: 'start-processing',
+          message: doc,
+        }),
+    );
     return {
-      success: await this.documentRepository.createDocument({
-        userId,
-        files,
-      }),
+      success: true,
       message: 'Files upload processing',
     };
   }
