@@ -3,19 +3,26 @@ import { DocumentService } from './document.service';
 import { DocumentRepository } from 'src/data/repositories';
 import { NotFoundException } from '@nestjs/common';
 import { EDocumentStatus } from '@app/enums';
+import { DocumentEntity } from '@app/entities';
+import { KafkaService } from 'src/services';
 
 describe('DocumentService', () => {
   let service: DocumentService;
   let documentRepository: jest.Mocked<DocumentRepository>;
+  let kafkaService: jest.Mocked<KafkaService>;
 
   beforeEach(async () => {
     const mockDocumentRepository = {
-      createDocumentAndAddToQueue: jest.fn(),
+      createDocument: jest.fn(),
       updateDocumentAndAddToQueue: jest.fn(),
       getDocument: jest.fn(),
       deleteExistingDocument: jest.fn(),
       getAllDocuments: jest.fn(),
       getOneDocument: jest.fn(),
+    };
+    const mockKafkaService = {
+      sendMessage: jest.fn().mockResolvedValue(undefined), // Mock sendMessage method
+      startProcessing: jest.fn().mockResolvedValue(undefined), // Mock startProcessing method
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -25,11 +32,16 @@ describe('DocumentService', () => {
           provide: DocumentRepository,
           useValue: mockDocumentRepository,
         },
+        {
+          provide: KafkaService,
+          useValue: mockKafkaService,
+        },
       ],
     }).compile();
 
     service = module.get<DocumentService>(DocumentService);
     documentRepository = module.get(DocumentRepository);
+    kafkaService = module.get(KafkaService);
   });
 
   it('should be defined', () => {
@@ -38,7 +50,9 @@ describe('DocumentService', () => {
 
   describe('uploadFiles', () => {
     it('should upload files and return response', async () => {
-      documentRepository.createDocumentAndAddToQueue.mockResolvedValue(true);
+      documentRepository.createDocument.mockResolvedValue(<DocumentEntity[]>[
+        {id:"docId-1",documentStatus:EDocumentStatus.PROCESSING,},
+      ]);
 
       const result = await service.uploadFiles({
         files: [{ originalname: 'file1.txt' }] as Express.Multer.File[],
@@ -50,7 +64,7 @@ describe('DocumentService', () => {
         message: 'Files upload processing',
       });
 
-      expect(documentRepository.createDocumentAndAddToQueue).toHaveBeenCalledWith({
+      expect(documentRepository.createDocument).toHaveBeenCalledWith({
         files: [{ originalname: 'file1.txt' }],
         userId: 'user-123',
       });
@@ -59,7 +73,9 @@ describe('DocumentService', () => {
 
   describe('updateDocumentFile', () => {
     it('should update document file and return response', async () => {
-      documentRepository.getDocument.mockResolvedValue({ id: 'document-123' } as any);
+      documentRepository.getDocument.mockResolvedValue({
+        id: 'document-123',
+      } as any);
       documentRepository.updateDocumentAndAddToQueue.mockResolvedValue(true);
 
       const result = await service.updateDocumentFile({
@@ -73,7 +89,9 @@ describe('DocumentService', () => {
         userId: 'user-123',
       });
 
-      expect(documentRepository.updateDocumentAndAddToQueue).toHaveBeenCalledWith({
+      expect(
+        documentRepository.updateDocumentAndAddToQueue,
+      ).toHaveBeenCalledWith({
         file: { originalname: 'newfile.txt' },
         documentId: 'document-123',
       });
@@ -128,7 +146,9 @@ describe('DocumentService', () => {
   describe('getAllDocuments', () => {
     it('should return all documents', async () => {
       const mockDocuments = [{ id: 'document-1' }, { id: 'document-2' }];
-      documentRepository.getAllDocuments.mockResolvedValue(mockDocuments as any);
+      documentRepository.getAllDocuments.mockResolvedValue(
+        mockDocuments as any,
+      );
 
       const result = await service.getAllDocuments({
         userId: 'user-123',
@@ -139,8 +159,9 @@ describe('DocumentService', () => {
 
       expect(documentRepository.getAllDocuments).toHaveBeenCalledWith({
         userId: 'user-123',
-        page: 1,
+        skip: 0,
         limit: 10,
+        documentStatus:EDocumentStatus.PROCESSING
       });
 
       expect(result).toEqual(mockDocuments);

@@ -1,6 +1,7 @@
 {
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "test/*"
   ],
   "compilerOptions": {
     "module": "commonjs",
@@ -21,22 +22,14 @@
     "noUncheckedIndexedAccess": true,
     "strictNullChecks": true,
     "target": "esnext",
+    "types": ["jest", "node"],
     "paths": {
-      "@app/libs": [
-        "src/libs"
-      ],
-      "@app/entities": [
-        "src/data/entities"
-      ],
-      "@app/enums": [
-        "src/data/enums"
-      ],
-      "@app/types": [
-        "src/types"
-      ],
-      "@app/utils": [
-        "src/utils"
-      ],
+      "@app/libs": ["src/libs"],
+      "@app/entities": ["src/data/entities"],
+      "@app/enums": ["src/data/enums"],
+      "@app/types": ["src/types"],
+      "@app/utils": ["src/utils"],
+      "@app/repositories": ["src/data/repositories"]
     }
   }
 }
