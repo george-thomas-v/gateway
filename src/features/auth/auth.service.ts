@@ -16,7 +16,7 @@ import { SessionRepository, UserRepository } from 'src/data/repositories';
 import { JwtService } from '@nestjs/jwt';
 import { ETokenType, JwtUser } from 'src/types/jwt-user.type';
 import { UserEntity } from '@app/entities';
-import { ResponseDto } from 'src/libs/dto';
+import { ResponseDto } from '@app/libs';
 import { Argon2Utils, GetEnvVariables } from '@app/utils';
 
 @Injectable()
